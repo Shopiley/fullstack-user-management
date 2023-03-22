@@ -24,16 +24,18 @@ app.add_middleware(
 
 router = APIRouter()
 
-
+# -------------------------------------------------------------------------------
+# This is supposed to render the new-html page on this URl - http://127.0.0.1:8000/ 
+# so that this html page is displayed once you run the app but it's not working. 
+# I haven't been able to figure out the problem so far. And I couldn't continue as the time limit on this test had elapsed
 BASE_DIR = Path(__file__).resolve().parent
 
 templates = Jinja2Templates(directory=str(Path(BASE_DIR, 'frontend')))
-# templates = Jinja2Templates(directory="C:/Users/personal/Documents/moni-africa-backend-test/frontend")
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("new-user.html", {"request": request})
-
+# -------------------------------------------------------------------------------
 
 client = MongoClient('mongodb+srv://adebayomoshope:shopsy2004@cluster0.fpt2kf3.mongodb.net/?retryWrites=true&w=majority&connectTimeoutMS=10000&socketTimeoutMS=10000')
 db = client.moni_users
