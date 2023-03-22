@@ -24,17 +24,20 @@
   <div class="content">
     
     <div class="container">
-
+      <a href="edit-password.html">Edit password             </a>
+      <a href="view-users.html">View Users</a>
       
       <div class="row justify-content-center">
         <div class="col-md-10">
           
           <div class="row align-items-center">
+            <div class="col-lg-4 ml-auto">
+              <div class="border-right pr-5 mb-5">
+              <img src="C:\Users\personal\Documents\moni-africa-backend-test\frontend\images\moni_image.jpg"><h2 class="mb-5">moni.</h2> 
+            </div>
+            </div>
             <div class="col-lg-7 mb-5 mb-lg-0">
-
-              
-
-              <form class="border-right pr-5 mb-5" method="post" id="add-user" name="add-user">
+              <form method="post" id="add-user" name="add-user">
                 <div class="row">
                   <div class="col-md-6 form-group">
                     <input type="text" class="form-control" name="fname" id="fname" placeholder="First name">
@@ -66,10 +69,6 @@
                 User has been created, thank you!
               </div>
 
-            </div>
-            <div class="col-lg-4 ml-auto">
-              <img src="C:\Users\personal\Documents\moni-africa-backend-test\frontend\form\contact-form-11\images\moni_image.jpg"><h2 class="mb-5">moni.</h2> 
-              
             </div>
           </div>
         </div>  
@@ -105,6 +104,12 @@
 			});
 			const data = await response.json();
 			console.log(data);
+      if (data.status == "success") {
+        alert("New user successfully created");
+      }
+      else{
+        alert(data.detail);
+      }
     }
   </script>
   </body>
