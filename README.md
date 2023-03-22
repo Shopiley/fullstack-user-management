@@ -36,3 +36,6 @@ Depending on your track, you are to work in the folder that concerns you.
   ```bash
   uvicorn main:app --reload
   ```
+### Frontend
+- Open any of the html files in `/frontend`
+- Ensure the server is running
