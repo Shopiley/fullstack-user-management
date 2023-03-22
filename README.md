@@ -35,6 +35,9 @@ This project is a monolith application. You will find two folders namely:
   ```bash
   uvicorn app:app --reload
   ```
+- Navigate to `http://127.0.0.1:8000/docs` to access the Swagger UI docs to test endpoints.
+
+
 ### Frontend
 - Open any of the html files in `/frontend`
 - Ensure the server is running
