@@ -1,12 +1,11 @@
 # moni-africa-backend-test
 ## Project Structure
 
-This project is a monolith application. You will find three folders namely:
+This project is a monolith application. You will find two folders namely:
 
 1. backend
 2. frontend
 
-Depending on your track, you are to work in the folder that concerns you.
 
 ## Setup
 
