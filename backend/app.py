@@ -1,17 +1,40 @@
-# from typing import Union, List
+from pathlib import Path
 from fastapi import FastAPI, APIRouter, Request, Response, HTTPException, status
 from fastapi.encoders import jsonable_encoder
-from pymongo import MongoClient
-from schema import RequestModel, ResponseModel, ListResponseModel
+from pydantic import EmailStr
+from pymongo import MongoClient, ReturnDocument
+from schema import RequestModel, ResponseModel, ListResponseModel, UpdatePasswordModel
 from typing import List
 from serializer import userEntity, userListEntity
 from bson.objectid import ObjectId
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 router = APIRouter()
 
 
-# , server_api=ServerApi('1')
+BASE_DIR = Path(__file__).resolve().parent
+
+templates = Jinja2Templates(directory=str(Path(BASE_DIR, 'frontend')))
+# templates = Jinja2Templates(directory="C:/Users/personal/Documents/moni-africa-backend-test/frontend")
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("new-user.html", {"request": request})
+
+
 client = MongoClient('mongodb+srv://adebayomoshope:shopsy2004@cluster0.fpt2kf3.mongodb.net/?retryWrites=true&w=majority&connectTimeoutMS=10000&socketTimeoutMS=10000')
 db = client.moni_users
 print("Connected to the MongoDB server")
@@ -28,13 +51,8 @@ def create_user(payload: RequestModel):
     except:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,  detail={"status": "error", "message": f"User with email: {payload.email} already exists"})
 
-    # return JSONResponse(
-    #     content=ResponseModel.success(data=response.dict(), message="user created"),
-    #     status_code=status.HTTP_201_CREATED,
-    # )
 
-
-@router.get("/users", response_description="Lists all users", response_model= ListResponseModel)
+@router.get("/", response_description="Lists all users", response_model= ListResponseModel)
 async def get_users(limit: int = 10, page: int = 1, search: str = ''):   
     skip = (page - 1) * limit
     query = {'$or': [{'fname': {'$regex': search, '$options': 'i'}},
@@ -47,19 +65,35 @@ async def get_users(limit: int = 10, page: int = 1, search: str = ''):
     return {"status": "success", "users": users, "pagination_data": pagination_data}
 
 
-@router.get('/{userId}', response_model=ResponseModel)
-def get_user(userId: str):
-    if not ObjectId.is_valid(userId):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Invalid id: {userId}")
-
-    user = collection.find_one({'_id': ObjectId(userId)})
+@router.get('/{email}', response_model=ResponseModel)
+def get_user(email: EmailStr):
+    user = collection.find_one({'email': email})
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"No user with this id: {userId} found")
+                            detail=f"No user with this email: {email} found")
     return {"status": "success", "user": userEntity(user)}
 
+
+@router.patch('/{email}', response_model=ResponseModel)
+def update_user(email: EmailStr, payload:UpdatePasswordModel):
+    user = collection.find_one({'email': email})
+    
+    if user["password"] != payload.old_password:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"old password entered is not correct for user with email: {email}")
+    
+    updated_user = collection.find_one_and_update(
+        {"email": email}, 
+        {'$set': {"password": payload.new_password}},
+        return_document=ReturnDocument.AFTER
+    )
+
+    if not updated_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No user with this email: {email} found")
+    
+    return {"status": "success", "user": userEntity(updated_user)}
 
 app.include_router(
     router, prefix='/api/users', tags=["Users"]
 )
+
+# app.mount("/", StaticFiles(directory="moni-africa-backend-test\frontend.new-user"), name="index")
