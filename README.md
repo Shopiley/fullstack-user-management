@@ -33,7 +33,7 @@ This project is a monolith application. You will find two folders namely:
 - Run the somman below to start the server
 
   ```bash
-  uvicorn main:app --reload
+  uvicorn app:app --reload
   ```
 ### Frontend
 - Open any of the html files in `/frontend`
