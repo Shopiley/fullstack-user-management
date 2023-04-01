@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,700,900&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="fonts/icomoon/style.css">
+  <link rel="stylesheet" href="fonts/icomoon/style.css">
 
-    <link rel="stylesheet" href="css/owl.carousel.min.css">
+  <link rel="stylesheet" href="css/owl.carousel.min.css">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    
-    <!-- Style -->
-    <link rel="stylesheet" href="css/style.css">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+
+  <!-- Style -->
+  <link rel="stylesheet" href="css/style.css">
   <title>Document</title>
   <style>
     img {
@@ -22,130 +23,136 @@
       display: block;
       margin-top: 20%;
     }
+
     table {
-          border-collapse: collapse;
-          width: 100%;
-          margin-top: 20px;
-        }
-    
-        th, td {
-          text-align: left;
-          padding: 8px;
-          border-bottom: 1px solid #ddd;
-        }
-    
-        th {
-          background-color: rgb(230, 102, 82);
-          color: white;
-        }
-    </style>
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #FA4727;
+      color: white;
+    }
+  </style>
 </head>
+
 <body>
+  <ul>
+    <li><a href="home.html"><img class="logo" src="images/black_moni.png"></a></li>
+    <li><a href="home.html">Home</a></li>
+    <li><a href="new-user.html">List a new user</a></li>
+    <li><a  href="edit-password.html">Edit password</a></li>   
+    <li><a class="active"  href="view-users.html">View Users</a></li>
+  </ul>
   <div class="content">
-    
+
     <div class="container">
-      <a href="new-user.html">List a new user</a>
-      <a href="edit-password.html">Edit password</a>
 
-      <div class="row justify-content-center">
-        <div class="col-md-10">
-          
-          <div class="row align-items-center">
-            <div class="col-lg-3 ml-auto">
-              <div class="border-right pr-5 mb-5">
-              <img src="images/moni_image.jpg"><h2 class="mb-5">moni.</h2> 
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+
+        <div class="row align-items-center">
+          <div class="col-lg-3 ml-auto">
+            <div class="border-right pr-5 mb-5">
+              <img src="images/moni_image.jpg">
+              <h2 class="mb-5">moni.</h2>
             </div>
-            </div>
-            <div class="col-lg-8 mb-5 mb-lg-0">
-              <form id="display">
-                <div class="row">
-                  <div class="col-md-12 form-group">
-                    <input type="text" class="form-control" name="email" id="email" placeholder="Enter user Email">
-                  </div>
+          </div>
+          <div class="col-lg-8 mb-5 mb-lg-0">
+            <form id="display">
+              <div class="row">
+                <div class="col-md-12 form-group">
+                  <input type="text" class="form-control" name="email" id="email" placeholder="Enter user Email">
                 </div>
-                <input type="submit" id="btn1" value="Search by Email"  class="btn btn-primary rounded-0 py-2 px-4">
-                <input type="button" id="btn2" value="Display all" class="btn btn-primary rounded-0 py-2 px-4">
-                </form>
-                <table id="data-table">
-                  <thead>
-                    <tr>
-                      <th>User ID</th>
-                      <th>First name</th>
-                      <th>Last name</th>
-                      <th>Email</th>
-                    </tr>
-                  </thead>
-                  <tbody id ="tbody">
-                  </tbody>
-                </table>
-            
-              <div id="form-message-warning mt-4"></div> 
-              <div id="form-message-success">
-                Password had been changed, thank you!
               </div>
-
-            </div>
+              <input type="submit" id="btn1" value="Search by Email" class="btn btn-primary rounded-0 py-2 px-4">
+              <input type="button" id="btn2" value="Display all" class="btn btn-primary rounded-0 py-2 px-4">
+            </form>
+            <table id="data-table">
+              <thead>
+                <tr>
+                  <th>User ID</th>
+                  <th>First name</th>
+                  <th>Last name</th>
+                  <th>Email</th>
+                </tr>
+              </thead>
+              <tbody id="tbody">
+              </tbody>
+            </table>
 
           </div>
-        </div>  
+
         </div>
       </div>
-  </div> 
+    </div>
+  </div>
+  </div>
+  <div class="footer">
+    <p>&copy; 2023 A test submission by Fadekemi Adebayo</p>
+  </div>
+
+  
   <script>
-		document.getElementById("btn1").addEventListener("click", displayByEmail);
+    document.getElementById("btn1").addEventListener("click", displayByEmail);
     document.getElementById("btn2").addEventListener("click", displayAll);
 
     async function displayByEmail(event) {
       event.preventDefault();
-      const email = document.getElementById("email").value;    
-      const response = await fetch(`http://localhost:8000/api/users/${email}`)
-      const data = await response.json();
+      const email = document.getElementById("email").value;
+      const response = await fetch(`http://localhost:8000/api/users?search=${email}`)
+      const data = await response.json()
       if (data.detail) {
         return alert(data.detail);
       }
-      user = data.user
+      user = data.users[0]
       const tableBody = document.querySelector('#data-table tbody');
       document.getElementById('tbody').innerHTML = '';
       const row = document.createElement('tr');
-					row.innerHTML = `
+      row.innerHTML = `
             <td>${user.id}</td>
 						<td>${user.fname}</td>
             <td>${user.lname}</td>
 						<td>${user.email}</td>
 					`;
-					tableBody.appendChild(row);
+      tableBody.appendChild(row);
     }
 
-  async function displayAll(event) {
-  try {
-    event.preventDefault();
-    const response = await fetch("http://localhost:8000/api/users/");
-    const res = await response.json();
-    console.log(res);
-    const data = res.users;
-    const tableBody = document.querySelector('#data-table tbody');
-    document.getElementById('tbody').innerHTML = '';   
-    if (data.length > 0) {
-      data.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
+    async function displayAll(event) {
+      try {
+        event.preventDefault();
+        const response = await fetch("http://localhost:8000/api/users/");
+        const res = await response.json();
+        console.log(res);
+        const data = res.users;
+        const tableBody = document.querySelector('#data-table tbody');
+        document.getElementById('tbody').innerHTML = '';
+        if (data.length > 0) {
+          data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
           <td>${item.id}</td>
           <td>${item.fname}</td>
           <td>${item.lname}</td>
           <td>${item.email}</td>
         `;
-        tableBody.appendChild(row);
-      });
+            tableBody.appendChild(row);
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
-  } catch (error) {
-    console.error(error);
-  }
-}
 
-
-
-	</script>
+  </script>
 </body>
+
 </html>
-
-

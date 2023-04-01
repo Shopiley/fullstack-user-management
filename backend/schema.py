@@ -1,7 +1,7 @@
 import re
 from typing import Any, List
 import uuid
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, constr, validator
 from bson.objectid import ObjectId
 
 class UserBaseModel(BaseModel):
@@ -11,7 +11,7 @@ class UserBaseModel(BaseModel):
     email: EmailStr
 
 class RequestModel(UserBaseModel):
-    password: str
+    password: constr(min_length=8, max_length=50)
 
     @validator('password')
     def validate_password(cls, password):
@@ -43,7 +43,7 @@ class ListResponseModel(BaseModel):
 
 class UpdatePasswordModel(BaseModel):
     old_password: str
-    new_password: str
+    new_password: constr(min_length=8, max_length=50)
 
     @validator('new_password')
     def validate_password(cls, password):
@@ -57,6 +57,7 @@ class UpdatePasswordModel(BaseModel):
             raise ValueError("Password must contain exactly 1 special character")
            
         return password
+
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
