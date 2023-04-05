@@ -8,6 +8,8 @@ from typing import List
 from serializer import userEntity, userListEntity
 from bson.objectid import ObjectId
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from jinja2 import Environment, FileSystemLoader
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import collection
@@ -15,7 +17,7 @@ from passlib.context import CryptContext
 
 app = FastAPI()
 print("app initialized! ")
-origins = ["http://127.0.0.1:8888"]
+origins = ["http://127.0.0.1:8888", "*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,20 +43,36 @@ def get_password_hash(password):
 # This is supposed to render the new-html page on this URl - http://127.0.0.1:8000/ 
 # so that this html page is displayed once you run the app but it's not working. 
 # I haven't been able to figure out the problem so far. And I couldn't continue as the time limit on this test had elapsed
-BASE_DIR = Path(__file__).resolve().parent
 
-templates = Jinja2Templates(directory=str(Path(BASE_DIR, 'frontend')))
+template_dir = "templates"
 
-@app.get("/", response_class=HTMLResponse)
+# Create a Jinja2 environment
+env = Environment(loader=FileSystemLoader(template_dir))
+
+# Define your route
+@app.get("/")
 async def index(request: Request):
-    return templates.TemplateResponse("new-user.html", {"request": request})
+    # Return the rendered HTML template as a response
+    return HTMLResponse(content=env.get_template("home.html").render(), status_code=200)
+
+@app.get("/new-user")
+async def index(request: Request):
+    return HTMLResponse(content=env.get_template("new-user.html").render(), status_code=200)
+
+@app.get("/view-users")
+async def index(request: Request):
+    return HTMLResponse(content=env.get_template("view-users.html").render(), status_code=200)
+
+@app.get("/edit-password")
+async def index(request: Request):
+    return HTMLResponse(content=env.get_template("edit-password.html").render(), status_code=200)
 # -------------------------------------------------------------------------------
 
 
 @router.post('/', response_description="Creates a new user", status_code=status.HTTP_201_CREATED, response_model = ResponseModel)
 def create_user(payload: RequestModel):
     try:
-        payload["password"] = get_password_hash(payload["password"])
+        payload.password = get_password_hash(payload.password)
         print(payload)
         new_user = collection.insert_one(payload.dict())
         response = collection.find_one({'_id': new_user.inserted_id}, {"password":0})
@@ -98,7 +116,7 @@ def update_password(userId: str, payload:UpdatePasswordModel):
         {'$set': {"password": get_password_hash(payload.new_password)}},
         return_document=ReturnDocument.AFTER
     )
-
+    print(updated_user)
     if not updated_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No user with this user id: {userId} found")
     
@@ -108,4 +126,3 @@ app.include_router(
     router, prefix='/api/users', tags=["Users"]
 )
 
-# app.mount("/", StaticFiles(directory="moni-africa-backend-test\frontend.new-user"), name="index")
