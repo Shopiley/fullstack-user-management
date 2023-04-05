@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,700,900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="fonts/icomoon/style.css">
+
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    
+    <!-- Style -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <title>New User</title>
+  </head>
+  <body>
+    <ul>
+      <li><a href="/"><img class="logo" src="images/black_moni.png"></a></li>
+      <li><a href="/">Home</a></li>
+      <li><a class="active" href="/new-user">List a new user</a></li>
+      <li><a  href="/edit-password">Edit password</a></li>   
+      <li><a href="/view-users">View Users</a></li>
+    </ul>
+  
+  <div class="content">
+    
+    <div class="container">
+    
+      <div class="row justify-content-center">
+        <div class="col-md-10">
+          
+          <div class="row align-items-center">
+            <div class="col-lg-4 ml-auto">
+              <div class="border-right pr-5 mb-5">
+              <img src="images/moni_image.jpg"><h2 class="mb-5">moni.</h2> 
+            </div>
+            </div>
+            <div class="col-lg-7 mb-5 mb-lg-0">
+              <form method="post" id="add-user" name="add-user">
+                <div class="row">
+                  <div class="col-md-6 form-group">
+                    <input type="text" class="form-control" name="fname" id="fname" placeholder="First name">
+                  </div>
+                  <div class="col-md-6 form-group">
+                    <input type="text" class="form-control" name="lname" id="lname" placeholder="Last name">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12 form-group">
+                    <input type="text" class="form-control" name="email" id="email" placeholder="Email">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12 form-group">
+                    <input type="password" class="form-control" name="password" id="password" placeholder="Password">
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <input type="submit" value="Add user" class="btn btn-primary rounded-0 py-2 px-4">
+                    <span class="submitting"></span>
+                  </div>
+                </div>
+              </form>
+
+            </div>
+          </div>
+        </div>  
+        </div>
+      </div>
+  </div>
+  <div class="footer">
+    <p>&copy; 2023 A test submission by Fadekemi Adebayo</p>
+  </div>
+
+    <script>
+    const form = document.getElementById("add-user");
+		form.addEventListener("submit", submitForm);
+
+		async function submitForm(event) {
+			event.preventDefault();
+			const fname = document.getElementById("fname").value;
+      const lname = document.getElementById("lname").value;
+			const email = document.getElementById("email").value;
+			const password = document.getElementById("password").value;
+			const payload = { fname, lname, email, password };
+      // console.log(payload)
+			const response = await fetch("http://localhost:8000/api/users", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(payload)
+			});
+			const data = await response.json();
+			// console.log(data);
+      if (data.status == "success") {
+        alert("New user successfully created");
+      }
+      else{
+        alert(data.detail);
+      }
+    }
+  </script>
+  </body>
+</html>
