@@ -37,7 +37,7 @@ async def index(request: Request):
     return templates.TemplateResponse("new-user.html", {"request": request})
 # -------------------------------------------------------------------------------
 
-client = MongoClient('mongodb+srv://adebayomoshope:shopsy2004@cluster0.fpt2kf3.mongodb.net/?retryWrites=true&w=majority&connectTimeoutMS=10000&socketTimeoutMS=10000')
+client = MongoClient('')
 db = client.moni_users
 print("Connected to the MongoDB server")
 collection = db.users
