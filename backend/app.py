@@ -7,9 +7,10 @@ from schema import RequestModel, ResponseModel, ListResponseModel, UpdatePasswor
 from typing import List
 from serializer import userEntity, userListEntity
 from bson.objectid import ObjectId
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from database import collection
+from passlib.context import CryptContext
 
 app = FastAPI()
 origins = ["*"]
@@ -24,29 +25,22 @@ app.add_middleware(
 
 router = APIRouter()
 
-# -------------------------------------------------------------------------------
-# This is supposed to render the new-html page on this URl - http://127.0.0.1:8000/ 
-# so that this html page is displayed once you run the app but it's not working. 
-# I haven't been able to figure out the problem so far. And I couldn't continue as the time limit on this test had elapsed
-BASE_DIR = Path(__file__).resolve().parent
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-templates = Jinja2Templates(directory=str(Path(BASE_DIR, 'frontend')))
+def verify_password(plain_password, hashed_password):
+    print(verify_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse("new-user.html", {"request": request})
-# -------------------------------------------------------------------------------
 
-client = MongoClient('mongodb+srv://adebayomoshope:shopsy2004@cluster0.fpt2kf3.mongodb.net/?retryWrites=true&w=majority&connectTimeoutMS=10000&socketTimeoutMS=10000')
-db = client.moni_users
-print("Connected to the MongoDB server")
-collection = db.users
-collection.create_index("email", unique=True)
+def get_password_hash(password):
+    print(get_password_hash)
+    return pwd_context.hash(password)
 
 
 @router.post('/', response_description="Creates a new user", status_code=status.HTTP_201_CREATED, response_model = ResponseModel)
 def create_user(payload: RequestModel):
     try:
+        payload.password = get_password_hash(payload.password)
         new_user = collection.insert_one(payload.dict())
         response = collection.find_one({'_id': new_user.inserted_id}, {"password":0})
         return {"status": "success", "user": userEntity(response)}
@@ -57,45 +51,49 @@ def create_user(payload: RequestModel):
 @router.get("/", response_description="Lists all users", response_model= ListResponseModel)
 async def get_users(limit: int = 10, page: int = 1, search: str = ''):   
     skip = (page - 1) * limit
+
     query = {'$or': [{'fname': {'$regex': search, '$options': 'i'}},
                     {'email': {'$regex': search, '$options': 'i'}}]}
+    
     total_count = collection.count_documents(query)
     cursor = collection.find(query).limit(limit).skip(skip)
 
     users = userListEntity(cursor)
     pagination_data = {"page": page, "limit": limit, "total_count": total_count}
+
     return {"status": "success", "users": users, "pagination_data": pagination_data}
 
 
-@router.get('/{email}', response_model=ResponseModel)
-def get_user(email: EmailStr):
-    user = collection.find_one({'email': email})
+@router.get('/{userId}', response_model=ResponseModel)
+def get_user(userId: str):
+
+    user = collection.find_one({'_id': ObjectId(userId)})
+    
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"No user with this email: {email} found")
+                            detail=f"No user with this userId: {userId} found")
+    
     return {"status": "success", "user": userEntity(user)}
 
 
-@router.patch('/{email}', response_model=ResponseModel)
-def update_user(email: EmailStr, payload:UpdatePasswordModel):
-    user = collection.find_one({'email': email})
-    
-    if user["password"] != payload.old_password:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"old password entered is not correct for user with email: {email}")
+@router.patch('/{userId}', response_model=ResponseModel)
+def update_password(userId: str, payload:UpdatePasswordModel):
+    user = collection.find_one({'_id': ObjectId(userId)})
+
+    if verify_password(payload.old_password, user["password"]) == False:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"old password entered is not correct for user with userId: {userId}")
     
     updated_user = collection.find_one_and_update(
-        {"email": email}, 
-        {'$set': {"password": payload.new_password}},
+        {"_id": userId}, 
+        {'$set': {"password": get_password_hash(payload.new_password)}},
         return_document=ReturnDocument.AFTER
     )
 
     if not updated_user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No user with this email: {email} found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No user with this user id: {userId} found")
     
     return {"status": "success", "user": userEntity(updated_user)}
 
 app.include_router(
     router, prefix='/api/users', tags=["Users"]
 )
-
-# app.mount("/", StaticFiles(directory="moni-africa-backend-test\frontend.new-user"), name="index")
