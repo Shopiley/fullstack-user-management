@@ -91,7 +91,6 @@ async def get_users(limit: int = 10, page: int = 1, search: str = ''):
 
 @router.get('/{userId}', response_model=ResponseModel)
 def get_user(userId: str):
-    print(userId)
     user = collection.find_one({'_id': ObjectId(userId)})
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -101,9 +100,7 @@ def get_user(userId: str):
 
 @router.patch('/{userId}', response_model=ResponseModel)
 def update_password(userId: str, payload:UpdatePasswordModel):
-    print(userId, "from patch")
     user = collection.find_one({'_id': ObjectId(userId)})
-    print(user)
     if verify_password(payload.old_password, user["password"]) == False:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"old password entered is not correct for user with userId: {userId}")
     
@@ -112,7 +109,6 @@ def update_password(userId: str, payload:UpdatePasswordModel):
         {'$set': {"password": get_password_hash(payload.new_password)}},
         return_document=ReturnDocument.AFTER
     )
-    print(updated_user)
     if not updated_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No user with this user id: {userId} found")
     
