@@ -39,11 +39,8 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     print(get_password_hash)
     return pwd_context.hash(password)
-# -------------------------------------------------------------------------------
-# This is supposed to render the new-html page on this URl - http://127.0.0.1:8000/ 
-# so that this html page is displayed once you run the app but it's not working. 
-# I haven't been able to figure out the problem so far. And I couldn't continue as the time limit on this test had elapsed
 
+# -------------------------------------------------------------------------------
 template_dir = "templates"
 
 # Create a Jinja2 environment
