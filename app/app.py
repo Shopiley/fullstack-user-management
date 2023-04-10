@@ -70,7 +70,6 @@ async def index(request: Request):
 def create_user(payload: RequestModel):
     try:
         payload.password = get_password_hash(payload.password)
-        print(payload)
         new_user = collection.insert_one(payload.dict())
         response = collection.find_one({'_id': new_user.inserted_id}, {"password":0})
         return {"status": "success", "user": userEntity(response)}
